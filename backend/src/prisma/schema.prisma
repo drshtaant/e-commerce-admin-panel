@@ -1,0 +1,1378 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model accruals {
+    id                Int       @id @default(autoincrement())
+    work_statement_id Int?
+    name              String?   @db.VarChar(255)
+    month             Int?
+    year              Int?
+    hours             Decimal?  @db.Decimal(12, 2)
+    closed            Boolean?  @default(false)
+    created_at        DateTime? @db.DateTime(0)
+    updated_at        DateTime? @db.DateTime(0)
+}
+
+model addresses {
+    id                        Int       @id @default(autoincrement())
+    addressable_type          String?   @db.VarChar(255)
+    addressable_id            Int?
+    line1                     String?   @db.VarChar(255)
+    line2                     String?   @db.VarChar(255)
+    line3                     String?   @db.VarChar(255)
+    line4                     String?   @db.VarChar(255)
+    line5                     String?   @db.VarChar(255)
+    city                      String?   @db.VarChar(255)
+    country                   String?   @db.VarChar(255)
+    postal_code               Int?
+    country_sub_division_code String?   @db.VarChar(255)
+    address_type              String?   @db.VarChar(255)
+    quickbooks_id             Int?
+    created_at                DateTime? @db.DateTime(0)
+    updated_at                DateTime? @db.DateTime(0)
+
+    @@index([addressable_id], map: "index_addresses_on_addressable_id")
+}
+
+model ar_internal_metadata {
+    key        String   @id @db.VarChar(255)
+    value      String?  @db.VarChar(255)
+    created_at DateTime @db.DateTime(0)
+    updated_at DateTime @db.DateTime(0)
+}
+
+model background_jobs {
+    id          Int       @id @default(autoincrement())
+    job_type    String?   @db.VarChar(255)
+    job_id      Int?
+    status      Int?
+    employee_id Int?
+    start_at    DateTime? @db.DateTime(0)
+    end_at      DateTime? @db.DateTime(0)
+}
+
+model budgets {
+    id                Int       @id @default(autoincrement())
+    total_amount      Decimal?  @db.Decimal(12, 2)
+    fromdate          DateTime? @db.Date
+    todate            DateTime? @db.Date
+    created_at        DateTime? @db.DateTime(0)
+    updated_at        DateTime? @db.DateTime(0)
+    active            Boolean?  @default(true)
+    work_statement_id Int?
+    description       String?   @db.Text
+}
+
+model capacity_indicators {
+    id                Int     @id @default(autoincrement())
+    project_role      String? @db.VarChar(255)
+    week              Int?
+    unallocated_hours Float?  @db.Float
+    available_hours   Float?  @db.Float
+    status            String? @db.VarChar(255)
+}
+
+model change_requests {
+    id                 Int       @id @default(autoincrement())
+    uid                String?   @db.VarChar(255)
+    name               String?   @db.VarChar(255)
+    dollar_budget      Float?    @db.Float
+    impact_on_cost     Float?    @db.Float
+    impact_on_deadline DateTime? @db.Date
+    milestone_id       Int?
+    created_at         DateTime? @db.DateTime(0)
+    updated_at         DateTime? @db.DateTime(0)
+
+    @@index([milestone_id], map: "index_change_requests_on_milestone_id")
+}
+
+model classifications {
+    id            Int       @id @default(autoincrement())
+    name          String?   @db.VarChar(255)
+    description   String?   @db.Text
+    sku           String?   @db.VarChar(255)
+    department_id Int?
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+    active        Boolean?  @default(true)
+
+    @@index([department_id], map: "index_classifications_on_department_id")
+}
+
+model company_accounts {
+    id                   Int       @id @default(autoincrement())
+    company_name         String?   @db.VarChar(255)
+    account_type         String?   @db.VarChar(255)
+    headquarter_location String?   @db.VarChar(255)
+    quickbooks_id        Int?
+    status               String?   @db.VarChar(255)
+    created_at           DateTime? @db.DateTime(0)
+    updated_at           DateTime? @db.DateTime(0)
+}
+
+model company_departments {
+    id                 Int       @id @default(autoincrement())
+    company_account_id Int?
+    name               String?   @db.VarChar(255)
+    details            String?   @db.Text
+    quickbooks_id      Int?
+    created_at         DateTime? @db.DateTime(0)
+    updated_at         DateTime? @db.DateTime(0)
+
+    @@index([company_account_id], map: "index_company_departments_on_company_account_id")
+}
+
+model components {
+    id          Int       @id @default(autoincrement())
+    jira_id     Int?
+    service_id  Int?
+    project_id  Int?
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+    name        String?   @db.VarChar(255)
+    description String?   @db.Text
+
+    @@index([project_id], map: "index_components_on_project_id")
+    @@index([service_id], map: "index_components_on_service_id")
+}
+
+model components_issues {
+    id           Int  @id @default(autoincrement())
+    component_id Int?
+    issue_id     Int?
+
+    @@index([component_id], map: "index_components_issues_on_component_id")
+    @@index([issue_id], map: "index_components_issues_on_issue_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model components_work_logs {
+    component_id Int?
+    work_log_id  Int?
+
+    @@index([component_id], map: "index_components_work_logs_on_component_id")
+    @@index([work_log_id], map: "index_components_work_logs_on_work_log_id")
+    @@ignore
+}
+
+model contacts {
+    id                    Int       @id @default(autoincrement())
+    company_department_id Int?
+    first_name            String?   @db.VarChar(255)
+    middle_name           String?   @db.VarChar(255)
+    last_name             String?   @db.VarChar(255)
+    email                 String?   @db.VarChar(255)
+    phone                 String?   @db.VarChar(255)
+    title                 String?   @db.VarChar(255)
+    suffix                String?   @db.VarChar(255)
+    quickbooks_id         Int?
+    created_at            DateTime? @db.DateTime(0)
+    updated_at            DateTime? @db.DateTime(0)
+
+    @@index([company_department_id], map: "index_contacts_on_company_department_id")
+}
+
+model departments {
+    id              Int       @id @default(autoincrement())
+    name            String?   @db.VarChar(255)
+    details         String?   @db.Text
+    quickbooks_id   BigInt?
+    active          Boolean?  @default(true)
+    created_at      DateTime? @db.DateTime(0)
+    updated_at      DateTime? @db.DateTime(0)
+    organization_id Int?
+}
+
+model designations {
+    id            Int       @id @default(autoincrement())
+    department_id Int?
+    title         String?   @db.VarChar(255)
+    description   String?   @db.Text
+    location_id   Int?
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+    active        Boolean?  @default(true)
+    non_exempt    Boolean?  @default(false)
+
+    @@index([department_id], map: "index_designations_on_department_id")
+}
+
+model EmployeeSkill {
+    id         Int       @id @default(autoincrement())
+    employeeId Int?      @map("employee_id")
+    serviceId  Int?      @map("service_id")
+    skillType  String?   @map("skill_type") @db.VarChar(255)
+    createdAt  DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+    skillId    Int?      @map("skill_id")
+    skillNote  String?   @map("skill_note") @db.Text
+
+    @@index([employeeId], map: "index_employee_skills_on_employee_id")
+    @@index([serviceId], map: "index_employee_skills_on_service_id")
+    @@map("employee_skills")
+}
+
+model Employee {
+    id                   Int       @id @default(autoincrement())
+    email                String    @unique(map: "index_employees_on_email") @default("") @db.VarChar(255)
+    encryptedPassword    String    @default("") @map("encrypted_password") @db.VarChar(255)
+    resetPasswordToken   String?   @unique(map: "index_employees_on_reset_password_token") @map("reset_password_token") @db.VarChar(255)
+    resetPasswordSentAt  DateTime? @map("reset_password_sent_at") @db.DateTime(0)
+    rememberCreatedAt    DateTime? @map("remember_created_at") @db.DateTime(0)
+    signInCount          Int       @default(0) @map("sign_in_count")
+    currentSignInAt      DateTime? @map("current_sign_in_at") @db.DateTime(0)
+    lastSignInAt         DateTime? @map("last_sign_in_at") @db.DateTime(0)
+    currentSignInIp      String?   @map("current_sign_in_ip") @db.VarChar(255)
+    lastSignInIp         String?   @map("last_sign_in_ip") @db.VarChar(255)
+    firstName            String?   @map("first_name") @db.VarChar(255)
+    lastName             String?   @map("last_name") @db.VarChar(255)
+    officePhone          String?   @map("office_phone") @db.VarChar(255)
+    cellPhone            String?   @map("cell_phone") @db.VarChar(255)
+    internalDepartmentId Int?      @map("internal_department_id")
+    organizationId       Int?      @map("organization_id")
+    jiraUsername         String?   @map("jira_username") @db.VarChar(255)
+    status               String?   @default("blocked") @db.VarChar(255)
+    gender               String?   @db.VarChar(255)
+    dob                  DateTime? @db.Date
+    skype                String?   @db.VarChar(255)
+    createdAt            DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt            DateTime? @map("updated_at") @db.DateTime(0)
+    provider             String?   @db.VarChar(255)
+    uid                  String?   @db.VarChar(255)
+    group                String?   @db.VarChar(255)
+    bio                  String?   @db.Text
+    image                String?   @db.VarChar(255)
+    personalEmail        String?   @map("personal_email") @db.VarChar(255)
+    joiningDate          DateTime? @map("joining_date") @db.Date
+    designationId        Int?      @map("designation_id")
+    locationId           Int?      @map("location_id")
+    isSupervisor         Boolean?  @default(false) @map("is_supervisor")
+    middleName           String?   @map("middle_name") @db.VarChar(255)
+    jiraAccountId        String?   @map("jira_account_id") @db.VarChar(255)
+    kekaEmployeeId       String?   @map("keka_employee_id") @db.VarChar(255)
+
+    oauthAccessGrants OauthAccessGrant[] // one to many
+    oauthAccessTokens OauthAccessToken[] // one to many
+    estimateResources EstimateResource[] // one to many
+
+    location Location? @relation(fields: [locationId], references: [id]) // one to one
+
+    @@index([jiraUsername], map: "index_employees_on_jira_username")
+    @@map("employees")
+}
+
+model EmployeeProject {
+    id         Int  @id @default(autoincrement())
+    employeeId Int? @map("employee_id")
+    projectId  Int? @map("project_id")
+
+    @@map("employees_projects")
+}
+
+model EmployeeRole {
+    id         Int  @id @default(autoincrement())
+    employeeId Int? @map("employee_id")
+    roleId     Int? @map("role_id")
+
+    @@index([employeeId], map: "index_employees_roles_on_employee_id")
+    @@index([roleId], map: "index_employees_roles_on_role_id")
+    @@map("employees_roles")
+}
+
+model EmployeeTour {
+    id         BigInt   @id @default(autoincrement())
+    employeeId Int?     @map("employee_id")
+    tourId     Int?     @map("tour_id")
+    active     Boolean? @default(false)
+    createdAt  DateTime @map("created_at") @db.DateTime(0)
+    updatedAt  DateTime @map("updated_at") @db.DateTime(0)
+
+    @@map("employees_tours")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model EmployeesWorkStatements {
+    employeeId      Int? @map("employee_id")
+    workStatementId Int? @map("work_statement_id")
+
+    @@index([employeeId], map: "index_employees_work_statements_on_employee_id")
+    @@index([workStatementId], map: "index_employees_work_statements_on_work_statement_id")
+    @@map("employees_work_statements")
+    @@ignore
+}
+
+model EstimateLineItem {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.Text
+    startDate  DateTime? @map("start_date") @db.Date
+    endDate    DateTime? @map("end_date") @db.Date
+    linkedTo   String?   @map("linked_to") @db.VarChar(255)
+    notes      String?   @db.Text
+    hours      Float?    @db.Float
+    parentId   Int?      @map("parent_id")
+    type       String?   @db.VarChar(255)
+    uid        String?   @db.VarChar(255)
+    estimateId Int?      @map("estimate_id")
+    createdAt  DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+    duration   Int?
+
+    estimate           Estimate?            @relation(fields: [estimateId], references: [id]) // one to one
+    resourceAllocation ResourceAllocation[] // one to many
+
+    @@unique([uid, estimateId], name: "uid_estimateId_unique")
+    @@index([estimateId], map: "index_estimate_line_items_on_estimate_id")
+    @@map("estimate_line_items")
+}
+
+model StatusType {
+    id                        String                      @id @default(uuid()) @db.Char(36)
+    status                    String                      @map("status") @db.VarChar(255)
+    color                     String                      @map("color") @db.VarChar(255)
+    projectId                 String?                     @map("project_id") @db.VarChar(255)
+    EstimateLineItemStatusMap EstimateLineItemStatusMap[] // one to many
+
+    @@map("status_type")
+}
+
+model EstimateLineItemStatusMap {
+    id         String    @id @default(uuid()) @db.Char(36)
+    estimateId Int?      @map("estimate_id")
+    taskUid    String?   @map("task_uid") @db.VarChar(255)
+    statusId   String?   @map("status_id") @db.Char(36)
+    createdAt  DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+
+    // Relation field
+    status StatusType? @relation(fields: [statusId], references: [id]) // one to one
+
+    @@unique([taskUid, estimateId], name: "task_uid_estimate_id_unique")
+    @@index([taskUid, estimateId], map: "index_estimate_line_item_status_maps_on_task_uid_and_estimate_id")
+    @@map("estimate_line_item_status_maps")
+}
+
+model EstimateResource {
+    id           Int       @id @default(autoincrement())
+    estimateId   Int?      @map("estimate_id")
+    employeeId   Int?      @map("employee_id")
+    createdAt    DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt    DateTime? @map("updated_at") @db.DateTime(0)
+    projectRole  String?   @map("project_role") @db.VarChar(255)
+    hourlyRate   Decimal?  @map("hourly_rate") @db.Decimal(12, 2)
+    resourceRole String?   @map("resource_role") @db.VarChar(255)
+
+    estimate           Estimate?            @relation(fields: [estimateId], references: [id]) // one to one
+    resourceAllocation ResourceAllocation[] // one to many
+    employee           Employee?            @relation(fields: [employeeId], references: [id]) // one to one
+
+    @@index([employeeId], map: "index_estimate_resources_on_employee_id")
+    @@index([estimateId], map: "index_estimate_resources_on_estimate_id")
+    @@map("estimate_resources")
+}
+
+model Estimate {
+    id                  Int       @id @default(autoincrement())
+    sheetUrl            String?   @map("sheet_url") @db.VarChar(255)
+    sheetName           String?   @map("sheet_name") @db.VarChar(255)
+    projectName         String?   @map("project_name") @db.VarChar(255)
+    status              Int?
+    createdAt           DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt           DateTime? @map("updated_at") @db.DateTime(0)
+    lastSyncedAt        DateTime? @map("last_synced_at") @db.DateTime(0)
+    jiraProjectKey      String?   @map("jira_project_key") @db.VarChar(255)
+    contractType        Int?      @default(0) @map("contract_type")
+    budget              Decimal?  @db.Decimal(12, 2)
+    startDate           DateTime? @map("start_date") @db.Date
+    companyDepartmentId Int?      @map("company_department_id")
+    poolType            Int?      @map("pool_type")
+
+    lineItems EstimateLineItem[] // One-to-many relation to estimate_line_items
+    resources EstimateResource[] // One-to-many relation to estimate_resources
+
+    @@index([jiraProjectKey], map: "index_estimates_on_jira_project_key")
+    @@map("estimates")
+}
+
+model EstimoEstimateResourceVersion {
+    id                 BigInt    @id @default(autoincrement())
+    estimateResourceId Int?      @map("estimate_resource_id")
+    column             String?   @db.VarChar(255)
+    fromDate           DateTime? @map("from_date") @db.Date
+    toDate             DateTime? @map("to_date") @db.Date
+    columnValue        String?   @map("column_value") @db.VarChar(255)
+    createdAt          DateTime  @map("created_at") @db.DateTime(0)
+    updatedAt          DateTime  @map("updated_at") @db.DateTime(0)
+
+    @@map("estimo_estimate_resource_versions")
+}
+
+model finance_accrual_intervals {
+    id             BigInt    @id @default(autoincrement())
+    interval_type  Int?
+    interval_start DateTime? @db.Date
+    active         Boolean?
+    created_at     DateTime  @db.DateTime(0)
+    updated_at     DateTime  @db.DateTime(0)
+}
+
+model finance_accrual_versions {
+    id             BigInt   @id @default(autoincrement())
+    item_type      String   @db.VarChar(255)
+    item_id        Int
+    event          String   @db.VarChar(255)
+    whodunnit      String?  @db.VarChar(255)
+    object         String?  @db.LongText
+    object_changes String?  @db.Text
+    created_at     DateTime @db.DateTime(0)
+    comments       String?  @db.Text
+    manual         Boolean?
+    updated_at     DateTime @db.DateTime(0)
+
+    @@index([item_type, item_id], map: "index_finance_accrual_versions_on_item_type_and_item_id")
+}
+
+model finance_accruals {
+    id                  BigInt   @id @default(autoincrement())
+    revenue             Decimal? @db.Decimal(12, 2)
+    snapshot_id         Int?
+    project_accrual_id  Int?
+    hours               Float?   @db.Float
+    active              Boolean?
+    created_at          DateTime @db.DateTime(0)
+    updated_at          DateTime @db.DateTime(0)
+    accrual_interval_id Int?
+
+    @@index([project_accrual_id], map: "index_finance_accruals_on_project_accrual_id")
+}
+
+model finance_budgeted_accruals {
+    id             BigInt    @id @default(autoincrement())
+    interval_type  Int?
+    interval_start DateTime? @db.Date
+    amount         Decimal?  @db.Decimal(12, 2)
+    created_at     DateTime  @db.DateTime(0)
+    updated_at     DateTime  @db.DateTime(0)
+}
+
+model finance_cash_balances {
+    id             BigInt    @id @default(autoincrement())
+    interval_type  Int?
+    interval_start DateTime? @db.Date
+    cash_value     Decimal?  @db.Decimal(12, 2)
+    created_at     DateTime  @db.DateTime(0)
+    updated_at     DateTime  @db.DateTime(0)
+}
+
+model finance_hubspot_deal_accruals {
+    id                  BigInt   @id @default(autoincrement())
+    deal_id             Int?
+    snapshot_id         Int?
+    accrual_interval_id Int?
+    monthly_revenue     Decimal? @db.Decimal(12, 2)
+    created_at          DateTime @db.DateTime(0)
+    updated_at          DateTime @db.DateTime(0)
+}
+
+model finance_hubspot_deal_stages {
+    id                 BigInt   @id @default(autoincrement())
+    name               String?  @db.VarChar(255)
+    hubspot_stage_name String?  @db.VarChar(255)
+    created_at         DateTime @db.DateTime(0)
+    updated_at         DateTime @db.DateTime(0)
+}
+
+model finance_hubspot_deal_versions {
+    id           BigInt   @id @default(autoincrement())
+    deal_id      Int?
+    column       String?  @db.VarChar(255)
+    column_value String?  @db.VarChar(255)
+    created_at   DateTime @db.DateTime(0)
+    updated_at   DateTime @db.DateTime(0)
+}
+
+model finance_hubspot_deals {
+    id                 BigInt    @id @default(autoincrement())
+    name               String?   @db.VarChar(255)
+    hubspot_deal_id    String?   @db.VarChar(255)
+    start_date         DateTime? @db.Date
+    end_date           DateTime? @db.Date
+    duration_in_months Int?
+    stage_id           Int?
+    account_manager_id Int?
+    type               String?   @db.VarChar(255)
+    budgeted_revenue   Decimal?  @db.Decimal(12, 2)
+    created_at         DateTime  @db.DateTime(0)
+    updated_at         DateTime  @db.DateTime(0)
+}
+
+model finance_invoices {
+    id           BigInt    @id @default(autoincrement())
+    value        Decimal?  @db.Decimal(12, 2)
+    accrual_id   Int?
+    invoice_date DateTime? @db.Date
+    created_at   DateTime  @db.DateTime(0)
+    updated_at   DateTime  @db.DateTime(0)
+    invoice_no   String?   @db.VarChar(255)
+}
+
+model finance_project_accrual_versions {
+    id                 BigInt    @id @default(autoincrement())
+    project_accrual_id Int?
+    column             String?   @db.VarChar(255)
+    from_date          DateTime? @db.Date
+    to_date            DateTime? @db.Date
+    column_value       String?   @db.VarChar(255)
+    created_at         DateTime  @db.DateTime(0)
+    updated_at         DateTime  @db.DateTime(0)
+}
+
+model finance_project_accruals {
+    id                    BigInt    @id @default(autoincrement())
+    name                  String?   @db.VarChar(255)
+    contract_type         Int?
+    estimate_id           Int?
+    account_manager_id    Int?
+    project_manager_id    Int?
+    contract_months       Int?
+    start_date            DateTime? @db.Date
+    active                Boolean?
+    created_at            DateTime  @db.DateTime(0)
+    updated_at            DateTime  @db.DateTime(0)
+    jira_code             String?   @db.VarChar(255)
+    company_department_id Int?
+    end_date              DateTime? @db.Date
+    budgeted_revenue      Decimal?  @db.Decimal(12, 2)
+}
+
+model finance_snapshots {
+    id             BigInt    @id @default(autoincrement())
+    active         Boolean?
+    interval_type  Int?
+    interval_start DateTime? @db.Date
+    created_at     DateTime  @db.DateTime(0)
+    updated_at     DateTime  @db.DateTime(0)
+}
+
+model fiscal_adjustments {
+    id          Int       @id @default(autoincrement())
+    snapshot_id Int?
+    value       Decimal?  @default(0.00) @db.Decimal(8, 2)
+    notes       String?   @db.Text
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+
+    @@index([snapshot_id], map: "index_fiscal_adjustments_on_snapshot_id")
+}
+
+model fiscal_datapoints {
+    id         Int       @id @default(autoincrement())
+    title      String?   @db.VarChar(255)
+    created_at DateTime? @db.DateTime(0)
+    updated_at DateTime? @db.DateTime(0)
+}
+
+model fiscal_snapshots {
+    id           Int       @id @default(autoincrement())
+    datapoint_id Int?
+    value        Decimal?  @default(0.00) @db.Decimal(12, 2)
+    year         String?   @db.VarChar(255)
+    month        String?   @db.VarChar(255)
+    created_at   DateTime? @db.DateTime(0)
+    updated_at   DateTime? @db.DateTime(0)
+
+    @@index([datapoint_id], map: "index_fiscal_snapshots_on_datapoint_id")
+}
+
+model fix_versions {
+    id           Int       @id @default(autoincrement())
+    name         String?   @db.VarChar(255)
+    description  String?   @db.Text
+    jira_id      Int?
+    project_id   Int?
+    start_date   DateTime? @db.Date
+    release_date DateTime? @db.Date
+    released     Boolean?
+    overdue      Boolean?
+    created_at   DateTime? @db.DateTime(0)
+    updated_at   DateTime? @db.DateTime(0)
+
+    @@index([project_id], map: "index_fix_versions_on_project_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model fix_versions_work_statements {
+    fix_version_id    Int?
+    work_statement_id Int?
+
+    @@ignore
+}
+
+model gcal_events {
+    id                Int       @id @default(autoincrement())
+    guid              String?   @db.VarChar(255)
+    employee_id       Int?
+    acceptance_status String?   @db.VarChar(255)
+    starts_at         DateTime? @db.DateTime(0)
+    ends_at           DateTime? @db.DateTime(0)
+    summary           String?   @db.VarChar(255)
+}
+
+model holidays {
+    id           Int       @id @default(autoincrement())
+    name         String?   @db.VarChar(255)
+    holiday_date DateTime? @db.Date
+    recurring    Boolean?  @default(false)
+    created_at   DateTime? @db.DateTime(0)
+    updated_at   DateTime? @db.DateTime(0)
+    active       Boolean?  @default(true)
+}
+
+model holidays_locations {
+    id          Int  @id @default(autoincrement())
+    holiday_id  Int?
+    location_id Int?
+}
+
+model invoice_items {
+    id                       Int       @id @default(autoincrement())
+    quickbooks_id            Int?
+    invoice_id               Int?
+    quantity                 Float?    @db.Float
+    taxable                  Boolean?
+    service_id               Int?
+    internal_department_id   Int?
+    memo                     String?   @db.Text
+    transaction_type         String?   @db.VarChar(255)
+    detail_type              String?   @db.VarChar(255)
+    service_text             String?   @db.VarChar(255)
+    internal_department_text String?   @db.VarChar(255)
+    created_at               DateTime? @db.DateTime(0)
+    updated_at               DateTime? @db.DateTime(0)
+    rate                     Decimal?  @db.Decimal(12, 2)
+    amount                   Decimal?  @db.Decimal(12, 2)
+    amount_received          Decimal?  @db.Decimal(12, 2)
+
+    @@index([internal_department_id], map: "index_invoice_items_on_internal_department_id")
+    @@index([invoice_id], map: "index_invoice_items_on_invoice_id")
+    @@index([service_id], map: "index_invoice_items_on_service_id")
+}
+
+model invoices {
+    id                  Int       @id @default(autoincrement())
+    invoice_number      String?   @db.VarChar(255)
+    invoice_date        DateTime? @db.Date
+    company_account_id  Int?
+    work_statement_id   Int?
+    quickbooks_id       Int?
+    term_id             Int?
+    ref_no              String?   @db.VarChar(255)
+    po_no               String?   @db.VarChar(255)
+    sent                Boolean?  @default(false)
+    due_date            DateTime? @db.Date
+    customer_memo       String?   @db.Text
+    currency            String?   @db.VarChar(255)
+    private_note        String?   @db.Text
+    created_at          DateTime? @db.DateTime(0)
+    updated_at          DateTime? @db.DateTime(0)
+    balance             Decimal?  @db.Decimal(12, 2)
+    total_amount        Decimal?  @db.Decimal(12, 2)
+    total_tax           Decimal?  @db.Decimal(12, 2)
+    sub_total           Decimal?  @db.Decimal(12, 2)
+    balance_without_tax Decimal?  @db.Decimal(12, 2)
+    tax_percent         Decimal?  @db.Decimal(5, 2)
+
+    @@index([company_account_id], map: "index_invoices_on_company_account_id")
+}
+
+model invoices_payments {
+    id         Int  @id @default(autoincrement())
+    invoice_id Int?
+    payment_id Int?
+
+    @@index([invoice_id], map: "index_invoices_payments_on_invoice_id")
+    @@index([payment_id], map: "index_invoices_payments_on_payment_id")
+}
+
+model involved_contacts {
+    id                Int       @id @default(autoincrement())
+    contact_id        Int?
+    work_statement_id Int?
+    contact_type      String?   @db.VarChar(255)
+    active            Boolean?  @default(true)
+    created_at        DateTime? @db.DateTime(0)
+    updated_at        DateTime? @db.DateTime(0)
+
+    @@index([contact_id], map: "index_involved_contacts_on_contact_id")
+    @@index([work_statement_id], map: "index_involved_contacts_on_work_statement_id")
+}
+
+model involved_departments {
+    id               Int       @id @default(autoincrement())
+    department_id    Int?
+    service_id       Int?
+    involvable_id    Int?
+    involvable_type  String?   @db.VarChar(255)
+    hours            Float?    @default(0) @db.Float
+    hourly_rate      Decimal?  @default(0.00) @db.Decimal(12, 2)
+    discounted_hours Float?    @default(0) @db.Float
+    discounted_price Decimal?  @default(0.00) @db.Decimal(12, 2)
+    price            Float?    @db.Float
+    active           Boolean?  @default(true)
+    created_at       DateTime? @db.DateTime(0)
+    updated_at       DateTime? @db.DateTime(0)
+    location_id      Int?
+    project_role_id  Int?
+
+    @@index([department_id], map: "index_involved_departments_on_department_id")
+    @@index([involvable_id], map: "index_involved_departments_on_involvable_id")
+    @@index([service_id], map: "index_involved_departments_on_service_id")
+}
+
+model issue_sources {
+    id            Int      @id @default(autoincrement())
+    source_id     Int?
+    source_type   String?  @db.VarChar(255)
+    issue_jira_id String?  @db.VarChar(255)
+    created_at    DateTime @db.DateTime(0)
+    updated_at    DateTime @db.DateTime(0)
+}
+
+model issues {
+    id                      Int       @id @default(autoincrement())
+    jira_key                String?   @unique(map: "index_issues_on_jira_key") @db.VarChar(255)
+    jira_id                 String?   @db.VarChar(255)
+    summary                 String?   @db.VarChar(255)
+    description             String?   @db.LongText
+    subtask                 Boolean?
+    parent_issue_key        String?   @db.VarChar(255)
+    priority                String?   @db.VarChar(255)
+    status                  String?   @db.VarChar(255)
+    resolution              String?   @db.VarChar(255)
+    original_estimate_hours Int?
+    hours_spent             Int?
+    project_id              Int?
+    work_statement_id       Int?
+    assignee_id             Int?
+    created_at              DateTime? @db.DateTime(0)
+    updated_at              DateTime? @db.DateTime(0)
+    fix_version_id          Int?
+    issuetype               String?   @db.VarChar(255)
+    estimate_line_item_uid  String?   @db.VarChar(255)
+
+    @@index([assignee_id], map: "index_issues_on_assignee_id")
+    @@index([project_id], map: "index_issues_on_project_id")
+    @@index([work_statement_id], map: "index_issues_on_work_statement_id")
+}
+
+model leave_applications {
+    id            Int       @id @default(autoincrement())
+    employee_id   Int?
+    reason        String?   @db.Text
+    from_date     DateTime? @db.Date
+    to_date       DateTime? @db.Date
+    hours         Int?
+    status        String?   @db.VarChar(255)
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+    leave_type_id Int?
+    keka_leave_id String?   @db.VarChar(255)
+}
+
+model leave_approvals {
+    id                   Int       @id @default(autoincrement())
+    leave_application_id Int?
+    status               String?   @db.VarChar(255)
+    employee_id          Int?
+    created_at           DateTime? @db.DateTime(0)
+    updated_at           DateTime? @db.DateTime(0)
+    comment              String?   @db.Text
+}
+
+model leave_types {
+    id          Int    @id @default(autoincrement())
+    location_id Int?
+    name        String @db.VarChar(255)
+}
+
+model leaves {
+    id            Int      @id @default(autoincrement())
+    balance_days  Decimal? @db.Decimal(10, 0)
+    balance_hours Decimal? @db.Decimal(10, 2)
+    employee_id   Int?
+    leave_type_id Int?
+    calendar_year Int?
+}
+
+model LineItemDetails {
+    id                   Int       @id @default(autoincrement())
+    taskDate             DateTime? @map("task_date") @db.Date
+    hours                Decimal?  @db.Decimal(6, 2)
+    holidayFor           String?   @map("holiday_for") @db.VarChar(255)
+    estimateLineItemId   Int?      @map("estimate_line_item_id")
+    employeeId           Int?      @map("employee_id")
+    createdAt            DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt            DateTime? @map("updated_at") @db.DateTime(0)
+    estimateResourceId   Int?      @map("estimate_resource_id")
+    resourceAllocationId Int?      @map("resource_allocation_id")
+
+    @@index([employeeId], map: "index_line_item_details_on_employee_id")
+    @@index([estimateLineItemId], map: "index_line_item_details_on_estimate_line_item_id")
+    @@map("line_item_details")
+}
+
+model Location {
+    id            Int        @id @default(autoincrement()) @map("id")
+    name          String?    @db.VarChar(255)
+    streetAddress String?    @map("street_address") @db.VarChar(255)
+    city          String?    @db.VarChar(255)
+    state         String?    @db.VarChar(255)
+    zip           Int?       @map("zip")
+    country       String?    @db.VarChar(255)
+    currency      String?    @db.VarChar(255)
+    createdAt     DateTime?  @map("created_at") @db.DateTime(0)
+    updatedAt     DateTime?  @map("updated_at") @db.DateTime(0)
+    active        Boolean?   @default(true)
+    timeZone      String?    @default("UTC") @map("time_zone") @db.VarChar(255)
+    Employee      Employee[] // one to many
+
+    @@map("locations")
+}
+
+model locations_organizations {
+    id              Int  @id @default(autoincrement())
+    location_id     Int?
+    organization_id Int?
+}
+
+model lokem_features {
+    id          Int       @id @default(autoincrement())
+    name        String?   @db.VarChar(255)
+    module_id   Int?
+    active      Boolean?  @default(true)
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+    description String?   @db.Text
+    policy_name String?   @db.VarChar(255)
+
+    @@index([module_id], map: "index_lokem_features_on_module_id")
+}
+
+model lokem_modules {
+    id          Int       @id @default(autoincrement())
+    name        String?   @db.VarChar(255)
+    description String?   @db.Text
+    active      Boolean?  @default(true)
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+}
+
+model lokem_permissions {
+    id           Int       @id @default(autoincrement())
+    feature_id   Int?
+    access_level String?   @db.VarChar(255)
+    active       Boolean?  @default(true)
+    created_at   DateTime? @db.DateTime(0)
+    updated_at   DateTime? @db.DateTime(0)
+    role_id      Int?
+
+    @@index([feature_id], map: "index_lokem_permissions_on_feature_id")
+    @@index([role_id], map: "index_lokem_permissions_on_role_id")
+}
+
+model lokem_permitted_locations {
+    id            Int       @id @default(autoincrement())
+    permission_id Int?
+    location_id   Int?
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+}
+
+model lokem_role_assignments {
+    id              Int       @id @default(autoincrement())
+    role_id         Int?
+    assignable_id   Int?
+    assignable_type String?   @db.VarChar(255)
+    created_at      DateTime? @db.DateTime(0)
+    updated_at      DateTime? @db.DateTime(0)
+
+    @@index([assignable_id], map: "index_lokem_role_assignments_on_assignable_id")
+    @@index([role_id], map: "index_lokem_role_assignments_on_role_id")
+}
+
+model lokem_roles {
+    id          Int       @id @default(autoincrement())
+    title       String?   @db.VarChar(255)
+    description String?   @db.Text
+    active      Boolean?  @default(true)
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+}
+
+model milestones {
+    id                    Int       @id @default(autoincrement())
+    name                  String?   @db.VarChar(255)
+    start_date            DateTime? @db.Date
+    end_date              DateTime? @db.Date
+    expected_billing_date DateTime? @db.Date
+    actual_billing_date   DateTime? @db.Date
+    work_statement_id     Int?
+    type                  String?   @db.VarChar(255)
+    created_at            DateTime? @db.DateTime(0)
+    updated_at            DateTime? @db.DateTime(0)
+
+    @@index([work_statement_id], map: "index_milestones_on_work_statement_id")
+}
+
+model notifications {
+    id            Int       @id @default(autoincrement())
+    employee_id   Int?
+    message       String?   @db.Text
+    sent_at       DateTime? @db.DateTime(0)
+    scheduled_for DateTime? @db.DateTime(0)
+    sent_mode     String?   @db.VarChar(255)
+    source_id     Int?
+    source_type   String?   @db.VarChar(255)
+    reason        String?   @db.VarChar(255)
+    attachment    String?   @db.VarChar(255)
+}
+
+model OauthAccessGrant {
+    id                BigInt           @id @default(autoincrement()) @map("id")
+    resourceOwnerId   Int?             @map("resource_owner_id")
+    applicationId     BigInt           @map("application_id")
+    token             String           @unique(map: "index_oauth_access_grants_on_token") @db.VarChar(255)
+    expiresIn         Int              @map("expires_in")
+    redirectUri       String           @map("redirect_uri") @db.Text
+    createdAt         DateTime         @map("created_at") @db.DateTime(0)
+    revokedAt         DateTime?        @map("revoked_at") @db.DateTime(0)
+    scopes            String           @default("") @db.VarChar(255)
+    employees         Employee?        @relation(fields: [resourceOwnerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_330c32d8d9")
+    oauthApplications OauthApplication @relation(fields: [applicationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_b4b53e07b8")
+
+    @@index([resourceOwnerId], map: "fk_rails_330c32d8d9")
+    @@index([applicationId], map: "index_oauth_access_grants_on_application_id")
+    @@map("oauth_access_grants")
+}
+
+model OauthAccessToken {
+    id                   BigInt           @id @default(autoincrement()) @map("id")
+    resourceOwnerId      Int?             @map("resource_owner_id")
+    applicationId        BigInt           @map("application_id")
+    token                String           @unique(map: "index_oauth_access_tokens_on_token") @db.VarChar(255)
+    refreshToken         String?          @unique(map: "index_oauth_access_tokens_on_refresh_token") @map("refresh_token") @db.VarChar(255)
+    expiresIn            Int?             @map("expires_in")
+    revokedAt            DateTime?        @map("revoked_at") @db.DateTime(0)
+    createdAt            DateTime         @map("created_at") @db.DateTime(0)
+    scopes               String?          @db.VarChar(255)
+    previousRefreshToken String           @default("") @map("previous_refresh_token") @db.VarChar(255)
+    oauthApplications    OauthApplication @relation(fields: [applicationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_732cb83ab7")
+    employees            Employee?        @relation(fields: [resourceOwnerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_ee63f25419")
+
+    @@index([resourceOwnerId], map: "fk_rails_ee63f25419")
+    @@index([applicationId], map: "index_oauth_access_tokens_on_application_id")
+    @@map("oauth_access_tokens")
+}
+
+model OauthApplication {
+    id                BigInt             @id @default(autoincrement()) @map("id")
+    name              String             @db.VarChar(255)
+    uid               String             @unique(map: "index_oauth_applications_on_uid") @db.VarChar(255)
+    secret            String             @db.VarChar(255)
+    redirectUri       String             @map("redirect_uri") @db.Text
+    scopes            String             @default("") @db.VarChar(255)
+    confidential      Boolean            @default(true)
+    createdAt         DateTime           @map("created_at") @db.DateTime(0)
+    updatedAt         DateTime           @map("updated_at") @db.DateTime(0)
+    oauthAccessGrants OauthAccessGrant[]
+    oauthAccessTokens OauthAccessToken[]
+
+    @@map("oauth_applications")
+}
+
+model organizations {
+    id          Int       @id @default(autoincrement())
+    name        String?   @db.VarChar(255)
+    description String?   @db.Text
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+    active      Boolean?  @default(true)
+}
+
+model payment_details {
+    id             Int       @id @default(autoincrement())
+    invoice_id     Int?
+    qb_payment_id  Int?
+    paid_amount    Decimal?  @db.Decimal(12, 2)
+    payment_method String?   @db.VarChar(255)
+    created_at     DateTime? @db.DateTime(0)
+    updated_at     DateTime? @db.DateTime(0)
+
+    @@index([invoice_id], map: "index_payment_details_on_invoice_id")
+    @@index([qb_payment_id], map: "index_payment_details_on_qb_payment_id")
+}
+
+model payment_schedules {
+    id                  Int       @id @default(autoincrement())
+    work_statement_id   Int?
+    actual_billing_date DateTime? @db.Date
+    amount              Float?    @db.Float
+    dollar_to_bill      Float?    @db.Float
+    percentage_to_bill  Int?
+    payable_type        String?   @db.VarChar(255)
+    payable_id          Int?
+    status              String?   @db.VarChar(255)
+    created_at          DateTime? @db.DateTime(0)
+    updated_at          DateTime? @db.DateTime(0)
+
+    @@index([payable_id], map: "index_payment_schedules_on_payable_id")
+    @@index([work_statement_id], map: "index_payment_schedules_on_work_statement_id")
+}
+
+model payments {
+    id                    Int       @id @default(autoincrement())
+    title                 String?   @db.VarChar(255)
+    amount                Float?    @db.Float
+    expected_date         DateTime? @db.Date
+    actual_date           DateTime? @db.Date
+    status                String?   @db.VarChar(255)
+    milestone_id          Int?
+    payable_type          String?   @db.VarChar(255)
+    payable_id            Int?
+    created_at            DateTime? @db.DateTime(0)
+    updated_at            DateTime? @db.DateTime(0)
+    expected_invoice_date DateTime? @db.Date
+
+    @@index([milestone_id], map: "index_payments_on_milestone_id")
+    @@index([payable_id], map: "index_payments_on_payable_id")
+}
+
+model plan_items {
+    id                 Int       @id @default(autoincrement())
+    source_id          Int?
+    source_type        String?   @db.VarChar(255)
+    start_at           DateTime? @db.DateTime(0)
+    end_at             DateTime? @db.DateTime(0)
+    task_description   String?   @db.Text
+    employee_id        Int?
+    hours              Decimal?  @db.Decimal(8, 4)
+    last_synced_at     DateTime? @db.DateTime(0)
+    tempo_plan_item_id Int?
+    issue_id           Int?
+    project_id         Int?
+
+    @@index([employee_id], map: "index_plan_items_on_employee_id")
+}
+
+model programs {
+    id                    Int       @id @default(autoincrement())
+    name                  String?   @db.VarChar(255)
+    active                Boolean?  @default(true)
+    company_id            Int?
+    company_department_id Int?
+    yearly_budget         Decimal?  @db.Decimal(12, 2)
+    created_at            DateTime? @db.DateTime(0)
+    updated_at            DateTime? @db.DateTime(0)
+}
+
+model ProjectCode {
+    id         Int       @id @default(autoincrement())
+    code       String?   @map("code") @db.VarChar(255)
+    codeType   String?   @map("code_type") @db.VarChar(255)
+    projectId  Int?      @map("project_id")
+    createdAt  DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+    lastSyncAt DateTime? @map("last_sync_at") @db.DateTime(0)
+    foreignId  String?   @map("foreign_id") @db.VarChar(255)
+
+    @@index([code], map: "index_project_codes_on_code")
+    @@index([projectId], map: "index_project_codes_on_project_id")
+    @@map("project_codes")
+}
+
+model ProjectLeave {
+    id                 Int  @id @default(autoincrement())
+    projectId          Int? @map("project_id")
+    leaveApplicationId Int? @map("leave_application_id")
+
+    @@map("project_leaves")
+}
+
+model ProjectMember {
+    id                  Int       @id @default(autoincrement())
+    employeeId          Int?      @map("employee_id")
+    workStatementId     Int?      @map("work_statement_id")
+    projectRoleId       Int?      @map("project_role_id")
+    membershipStartDate DateTime? @map("membership_start_date") @db.Date
+    membershipEndDate   DateTime? @map("membership_end_date") @db.Date
+    createdAt           DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt           DateTime? @map("updated_at") @db.DateTime(0)
+    projectId           Int?      @map("project_id")
+
+    @@index([employeeId], map: "index_project_members_on_employee_id")
+    @@index([projectRoleId], map: "index_project_members_on_project_role_id")
+    @@index([workStatementId], map: "index_project_members_on_work_statement_id")
+    @@map("project_members")
+}
+
+model ProjectOwner {
+    id              Int       @id @default(autoincrement())
+    ownableType     String?   @map("ownable_type") @db.VarChar(255)
+    ownableId       Int?      @map("ownable_id")
+    employeeId      Int?      @map("employee_id")
+    createdAt       DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt       DateTime? @map("updated_at") @db.DateTime(0)
+    workStatementId Int?      @map("work_statement_id")
+
+    @@map("project_owners")
+}
+
+model ProjectRole {
+    id          Int       @id @default(autoincrement())
+    title       String?   @db.VarChar(255)
+    active      Boolean?  @default(true)
+    createdAt   DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt   DateTime? @map("updated_at") @db.DateTime(0)
+    serviceId   Int?      @map("service_id")
+    description String?   @db.Text
+
+    @@map("project_roles")
+}
+
+model Project {
+    id                  Int       @id @default(autoincrement())
+    name                String?   @db.VarChar(255)
+    projectType         String?   @map("project_type") @db.VarChar(255)
+    active              Boolean?  @default(true)
+    companyDepartmentId Int?      @map("company_department_id")
+    createdAt           DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt           DateTime? @map("updated_at") @db.DateTime(0)
+    logoUrl             String?   @map("logo_url") @db.VarChar(255)
+    programId           Int?      @map("program_id")
+
+    @@index([companyDepartmentId], map: "index_projects_on_company_department_id")
+    @@map("projects")
+}
+
+model qb_payments {
+    id            Int       @id @default(autoincrement())
+    quickbooks_id Int?
+    paid_on       DateTime? @db.Date
+    total_amount  Decimal?  @db.Decimal(12, 2)
+    currency      String?   @db.VarChar(255)
+    exchange_rate Decimal?  @db.Decimal(8, 2)
+    private_note  String?   @db.Text
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+}
+
+model qualifications {
+    id              Int       @id @default(autoincrement())
+    employee_id     Int?
+    course          String?   @db.VarChar(255)
+    specialization  String?   @db.VarChar(255)
+    institution     String?   @db.VarChar(255)
+    grade           String?   @db.VarChar(255)
+    completion_year Int?      @db.SmallInt
+    created_at      DateTime? @db.DateTime(0)
+    updated_at      DateTime? @db.DateTime(0)
+}
+
+model ResourceAllocation {
+    id                 Int       @id @default(autoincrement())
+    estimateResourceId Int?      @map("estimate_resource_id")
+    estimateLineItemId Int?      @map("estimate_line_item_id")
+    billedHours        Decimal?  @map("billed_hours") @db.Decimal(10, 2)
+    writeOff           Decimal?  @map("write_off") @db.Decimal(10, 2)
+    createdAt          DateTime? @map("created_at") @db.DateTime(0)
+    updatedAt          DateTime? @map("updated_at") @db.DateTime(0)
+
+    estimateResource EstimateResource? @relation(fields: [estimateResourceId], references: [id]) // one to one
+    estimateLineItem EstimateLineItem? @relation(fields: [estimateLineItemId], references: [id]) // one to one
+
+    @@index([estimateLineItemId], map: "index_resource_allocations_on_estimate_line_item_id")
+    @@map("resource_allocations")
+}
+
+model ResourceBudgetings {
+    id                    Int       @id @default(autoincrement())
+    billed_hours          Float?    @db.Float
+    unbilled_hours        Float?    @db.Float
+    cost_rate             Float?    @db.Float
+    sell_rate             Float?    @db.Float
+    designation           String?   @db.VarChar(255)
+    estimate_line_item_id Int?
+    created_at            DateTime? @db.DateTime(0)
+    updated_at            DateTime? @db.DateTime(0)
+
+    @@index([estimate_line_item_id], map: "index_resource_budgetings_on_estimate_line_item_id")
+    @@map("resource_budgetings")
+}
+
+model schema_migrations {
+    version String @unique(map: "unique_schema_migrations") @db.VarChar(255)
+}
+
+model service_designations {
+    id             Int       @id @default(autoincrement())
+    designation_id Int?
+    service_id     Int?
+    created_at     DateTime? @db.DateTime(0)
+    updated_at     DateTime? @db.DateTime(0)
+
+    @@index([designation_id], map: "index_service_designations_on_designation_id")
+    @@index([service_id], map: "index_service_designations_on_service_id")
+}
+
+model services {
+    id                Int       @id @default(autoincrement())
+    name              String?   @db.VarChar(255)
+    description       String?   @db.Text
+    department_id     Int?
+    quickbooks_id     BigInt?
+    active            Boolean?  @default(true)
+    created_at        DateTime? @db.DateTime(0)
+    updated_at        DateTime? @db.DateTime(0)
+    sku               String?   @db.VarChar(255)
+    classification_id Int?
+
+    @@index([department_id], map: "index_services_on_department_id")
+}
+
+model sessions {
+    id         Int       @id @default(autoincrement())
+    session_id String    @unique(map: "index_sessions_on_session_id") @db.VarChar(255)
+    data       String?   @db.Text
+    created_at DateTime? @db.DateTime(0)
+    updated_at DateTime? @db.DateTime(0)
+
+    @@index([updated_at], map: "index_sessions_on_updated_at")
+}
+
+model skills {
+    id          BigInt   @id @default(autoincrement())
+    skill_name  String?  @db.VarChar(255)
+    description String?  @db.Text
+    created_at  DateTime @db.DateTime(0)
+    updated_at  DateTime @db.DateTime(0)
+}
+
+model supervisors {
+    id            Int       @id @default(autoincrement())
+    employee_id   Int?
+    supervisor_id Int?
+    type          String?   @db.VarChar(255)
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+}
+
+model team_members {
+    id          Int       @id @default(autoincrement())
+    employee_id Int?
+    team_id     Int?
+    active      Boolean?  @default(false)
+    created_at  DateTime? @db.DateTime(0)
+    updated_at  DateTime? @db.DateTime(0)
+}
+
+model teams {
+    id            Int       @id @default(autoincrement())
+    department_id Int?
+    name          String?   @db.VarChar(255)
+    description   String?   @db.Text
+    active        Boolean?  @default(false)
+    created_at    DateTime? @db.DateTime(0)
+    updated_at    DateTime? @db.DateTime(0)
+}
+
+model tempo_sync_requests {
+    id           Int       @id @default(autoincrement())
+    employee_id  Int?
+    status       String?   @db.VarChar(255)
+    requested_by Int?
+    requested_at DateTime? @db.DateTime(0)
+    started_at   DateTime? @db.DateTime(0)
+    ended_at     DateTime? @db.DateTime(0)
+}
+
+model tokens {
+    id                  Int       @id @default(autoincrement())
+    encrypted_token     String?   @db.Text
+    encrypted_secret    String?   @db.Text
+    realm_id            String?   @db.VarChar(255)
+    expiry_date         DateTime? @db.Date
+    encrypted_raw_token String?   @db.Text
+    token_type          String?   @db.VarChar(255)
+    created_at          DateTime? @db.DateTime(0)
+    updated_at          DateTime? @db.DateTime(0)
+    secret_code         String?   @db.Text
+}
+
+model tours {
+    id         BigInt   @id @default(autoincrement())
+    name       String?  @db.VarChar(255)
+    created_at DateTime @db.DateTime(0)
+    updated_at DateTime @db.DateTime(0)
+}
+
+model versions {
+    id                            Int       @id @default(autoincrement())
+    item_type                     String
+    item_id                       Int
+    event                         String    @db.VarChar(255)
+    whodunnit                     String?   @db.VarChar(255)
+    object                        String?   @db.LongText
+    created_at                    DateTime? @db.DateTime(0)
+    object_changes                String?   @db.LongText
+    initial_expected_invoice_date DateTime? @db.Date
+    expected_invoice_date_changed Boolean?  @default(false)
+    comments                      String?   @db.Text
+    manual                        Boolean?  @default(false)
+
+    @@index([item_type, item_id], map: "index_versions_on_item_type_and_item_id")
+}
+
+model work_logs {
+    id                Int       @id @default(autoincrement())
+    work_statement_id Int?
+    work_date         DateTime? @db.Date
+    hours             Decimal?  @db.Decimal(8, 2)
+    tempo_id          Int?      @unique(map: "index_work_logs_on_tempo_id")
+    created_at        DateTime? @db.DateTime(0)
+    updated_at        DateTime? @db.DateTime(0)
+    issue_id          Int?
+    fix_version_id    Int?
+    project_member_id Int?
+    jira_author       String?   @db.VarChar(255)
+    billed_hours      Decimal?  @db.Decimal(8, 2)
+    jira_account_id   String?   @db.VarChar(255)
+    employee_id       Int?
+
+    @@index([employee_id], map: "index_work_logs_on_employee_id")
+    @@index([issue_id], map: "index_work_logs_on_issue_id")
+    @@index([jira_author], map: "index_work_logs_on_jira_author")
+    @@index([work_statement_id], map: "index_work_logs_on_work_statement_id")
+}
+
+model work_statements {
+    id                       Int       @id @default(autoincrement())
+    project_id               Int?
+    name                     String?   @db.VarChar(255)
+    price                    Float?    @db.Float
+    start_date               DateTime? @db.Date
+    projected_end_date       DateTime? @db.Date
+    actual_end_date          DateTime? @db.Date
+    status                   String?   @db.VarChar(255)
+    contract_type            String?   @db.VarChar(255)
+    change_request           Boolean?
+    master_work_statement_id Int?
+    created_at               DateTime? @db.DateTime(0)
+    updated_at               DateTime? @db.DateTime(0)
+
+    @@index([project_id], map: "index_work_statements_on_project_id")
+}

@@ -1,0 +1,97 @@
+{
+	"name": "bitool-backend",
+	"version": "0.1.0",
+	"description": "Backend Service",
+	"main": "./src/App.ts",
+	"private": true,
+	"scripts": {
+		"postinstall": "husky install",
+		"check-types": "tsc --noemit",
+		"run-eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
+		"lint": "yarn run-eslint && yarn check-types",
+		"format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+		"prisma": "ts-node ./.scripts/PrismaCLIEnvHelper.ts",
+		"start:dev": "nodemon",
+		"build": "rimraf ./build && tsc --project tsconfig.json && tsconfig-replace-paths -p tsconfig.json -s ./ -o ./build",
+		"start:staging": "NODE_ENV=staging node ./build/src/App.js",
+		"start:production": "NODE_ENV=production node ./build/src/App.js",
+		"inspect": "nodemon --inspect ./src/App.ts",
+		"bump-version": "npm version --no-git-tag-version",
+		"get-next-version": "ts-node ./.standard-version/commands/ComputeNextVersion.ts",
+		"release-branch": "git flow release start $(ts-node ./.standard-version/commands/ComputeNextVersion.ts)",
+		"release": "standard-version"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx}": [
+			"prettier --check",
+			"eslint"
+		]
+	},
+	"standard-version": {
+		"skip": {
+			"tag": true
+		},
+		"scripts": {
+			"postcommit": "ts-node ./.standard-version/commands/FixGitFlowReleaseBranchName.ts"
+		}
+	},
+	"prisma": {
+		"schema": "src/prisma/schema.prisma",
+		"seed": "ts-node src/prisma/seed.ts"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^17.7.1",
+		"@commitlint/config-conventional": "^17.7.0",
+		"@types/conventional-recommended-bump": "^6.1.1",
+		"@types/cors": "^2.8.14",
+		"@types/express": "^4.17.18",
+		"@types/joi": "^17.2.3",
+		"@types/node": "^20.7.0",
+		"@types/nodemailer": "^6.4.11",
+		"@types/swagger-jsdoc": "^6.0.1",
+		"@types/swagger-ui-express": "^4.1.4",
+		"@typescript-eslint/eslint-plugin": "^6.7.2",
+		"@typescript-eslint/parser": "^6.7.2",
+		"conventional-recommended-bump": "6.1.0",
+		"eslint": "8.40",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-import-resolver-typescript": "^3.6.1",
+		"eslint-plugin-import": "^2.28.1",
+		"eslint-plugin-prettier": "^5.0.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^14.0.1",
+		"nodemon": "^3.0.1",
+		"prettier": "^3.0.3",
+		"prisma": "^5.4.1",
+		"rimraf": "^5.0.5",
+		"semver": "^7.5.4",
+		"simple-git": "^3.20.0",
+		"standard-version": "^9.5.0",
+		"ts-node": "^10.9.1",
+		"tsconfig-paths": "^4.2.0",
+		"tsconfig-replace-paths": "^0.0.14",
+		"typescript": "^5.2.2"
+	},
+	"dependencies": {
+		"@prisma/client": "5.4.1",
+		"celebrate": "^15.0.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.3.1",
+		"dotenv-cli": "^7.3.0",
+		"express": "^4.18.2",
+		"express-jwt": "^8.4.1",
+		"helmet": "^7.0.0",
+		"joi": "^17.10.2",
+		"moment-timezone": "^0.5.43",
+		"nodemailer": "^6.9.5",
+		"qs": "^6.11.2",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.0",
+		"winston": "^3.10.0"
+	},
+	"volta": {
+		"node": "18.18.0",
+		"yarn": "3.6.3"
+	}
+}
