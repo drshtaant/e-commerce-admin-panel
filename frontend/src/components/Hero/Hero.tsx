@@ -56,7 +56,7 @@ const callsToAction = [
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
-export default function Navbar() {
+export default function Hero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (

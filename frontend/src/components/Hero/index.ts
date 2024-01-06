@@ -1,3 +1,3 @@
-import Herp from "./Hero";
+import Hero from "./Hero";
 
-export default Herp
+export default Hero
