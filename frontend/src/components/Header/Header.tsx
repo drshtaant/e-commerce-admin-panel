@@ -1,12 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   UserCircleIcon,
   InformationCircleIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import SignIn from "@/components/SignIn/SignIn";
+import SignUp from "@/components/SignUp/SignUp";
 
 export default function Header() {
+  const [isSignInOpen, setSignInOpen] = useState(false);
+  const [isSignUpOpen, setSignUpOpen] = useState(false);
+
+  const handleSignInClick = () => {
+    setSignInOpen(true);
+  };
+  const handleSignUpClick = () => {
+    setSignUpOpen(true);
+  };
+
   return (
     <div className="bg-gray-900 py-2 px-48">
       <div className="flex items-center justify-between text-sm mb-1">
@@ -35,17 +47,25 @@ export default function Header() {
           </div>
           <div className="flex items-center">
             <UserCircleIcon className="h-5 w-5 text-white text-sm font-sm" />
-            <a className="cursor-pointer rounded-sm py-1 px-2 text-sm font-sm hover:text-indigo-300">
+            <button
+              onClick={handleSignInClick}
+              className="cursor-pointer rounded-sm py-1 px-2 text-sm font-sm hover:text-indigo-300"
+            >
               Sign in
-            </a>
+            </button>
             /
-            <a className="cursor-pointer rounded-sm py-1 px-2 text-sm font-sm hover:text-indigo-300">
+            <button
+              onClick={handleSignUpClick}
+              className="cursor-pointer rounded-sm py-1 px-2 text-sm font-sm hover:text-indigo-300"
+            >
               Register
-            </a>
+            </button>
           </div>
         </div>
       </div>
       <hr />
+      {isSignInOpen && <SignIn closeModal={setSignInOpen} />}
+      {isSignUpOpen && <SignUp closeModal={setSignUpOpen} />}
     </div>
   );
 }
