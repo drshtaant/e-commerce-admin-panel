@@ -20,7 +20,7 @@ function SubHeader() {
           <input
             type="text"
             className="w-full text-slate-100 rounded-md border bg-gray-500 border-gray-500 px-3 py-2 text-sm"
-            value="Search"
+            defaultValue="Search"
           />
         </div>
 
